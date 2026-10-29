@@ -22,6 +22,17 @@ public class DialogueManager : MonoBehaviour
     public TMP_Text dialogueText;
     public DialogueLine[] lines;
 
+    public GameObject choicePanel;
+
+    // 첫 번째 선택지를 골랐을 때 나올 대사
+    public DialogueLine[] firstBranch;
+
+    // 두 번째 선택지를 골랐을 때 나올 대사
+    public DialogueLine[] secondBranch;
+
+    private bool isChoosing = false;
+    private bool hasChosen = false;
+
     [Min(0.001f)]
     public float typingSpeed = 0.05f;
 
@@ -48,6 +59,10 @@ public class DialogueManager : MonoBehaviour
 
     private void Start()
     {
+        choicePanel.SetActive(false);
+        isChoosing = false;
+        hasChosen = false;
+
         currentIndex = 0;
         isFinished = false;
 
@@ -94,7 +109,7 @@ public class DialogueManager : MonoBehaviour
 
     public void NextDialogue()
     {
-        if (isFinished)
+        if (isFinished || isChoosing)
             return;
 
         // 타이핑 중 클릭하면 현재 대사를 전부 표시해.
@@ -124,10 +139,48 @@ public class DialogueManager : MonoBehaviour
 
     private void EndDialogue()
     {
+        // 공통 대사가 끝나면 선택지를 표시
+        if (!hasChosen)
+        {
+            isChoosing = true;
+            choicePanel.SetActive(true);
+            return;
+        }
+
+        // 선택한 분기의 대사까지 끝나면 대화 종료
         isFinished = true;
         dialoguePanel.SetActive(false);
 
-        // 나중에 미니게임 시작 기능을 연결할 위치.
-        Debug.Log("대화 종료");
+        Debug.Log("분기 대화 종료");
+    }
+
+    public void SelectChoice(int choiceIndex)
+    {
+        // 선택지가 떠 있을 때만 작동
+        if (!isChoosing)
+            return;
+
+        if (choiceIndex != 0 && choiceIndex != 1)
+            return;
+
+        choicePanel.SetActive(false);
+
+        isChoosing = false;
+        hasChosen = true;
+        isFinished = false;
+
+        // 선택에 따라 사용할 대사 목록 변경
+        lines = choiceIndex == 0 ? firstBranch : secondBranch;
+
+        currentIndex = 0;
+
+        if (lines == null || lines.Length == 0)
+        {
+            EndDialogue();
+            return;
+        }
+
+        dialoguePanel.SetActive(true);
+        ShowLine();
     }
 }
