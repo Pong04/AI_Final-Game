@@ -12,17 +12,29 @@ public class MemoryGameManager : MonoBehaviour
     [Header("UI")]
     public TMP_Text pairText;
     public TMP_Text attemptText;
+
+    [Header("결과창")]
+    public GameObject resultPanel;
     public TMP_Text resultText;
 
-    [Header("설정")]
+    [Header("게임 설정")]
     public float flipBackDelay = 0.8f;
 
-    // 서로 다른 단어 8개를 입력해줘.
+    [Header("등급 설정")]
+    [Min(8)]
+    public int aGradeMaxAttempts = 12;
+
+    [Min(8)]
+    public int maxAttempts = 20;
+
+    [Header("서로 다른 단어 8개")]
     public string[] words =
     {
         "사과", "바다", "학교", "게임",
         "고양이", "노트북", "하늘", "친구"
     };
+
+    public MiniGameSceneFlow sceneFlow;
 
     private MemoryCard firstCard;
     private MemoryCard secondCard;
@@ -35,21 +47,28 @@ public class MemoryGameManager : MonoBehaviour
 
     private void Start()
     {
+        maxAttempts = Mathf.Max(8, maxAttempts);
+
+        aGradeMaxAttempts = Mathf.Clamp(
+            aGradeMaxAttempts,
+            8,
+            maxAttempts
+        );
+
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(false);
+        }
+
         if (resultText != null)
         {
-            resultText.gameObject.SetActive(false);
+            resultText.gameObject.SetActive(true);
         }
 
         if (!ValidateWords())
         {
             isFinished = true;
-
-            if (resultText != null)
-            {
-                resultText.gameObject.SetActive(true);
-                resultText.text = "서로 다른 단어 8개를 입력해주세요.";
-            }
-
+            ShowResult("서로 다른 단어 8개를 입력해주세요.");
             return;
         }
 
@@ -87,14 +106,12 @@ public class MemoryGameManager : MonoBehaviour
     {
         List<string> deck = new List<string>();
 
-        // 같은 단어를 두 장씩 추가 → 총 16장
         foreach (string word in words)
         {
             deck.Add(word.Trim());
             deck.Add(word.Trim());
         }
 
-        // 카드 순서를 랜덤으로 섞기
         for (int i = deck.Count - 1; i > 0; i--)
         {
             int randomIndex = Random.Range(0, i + 1);
@@ -104,7 +121,6 @@ public class MemoryGameManager : MonoBehaviour
             deck[randomIndex] = temp;
         }
 
-        // 카드판 안에 생성
         foreach (string word in deck)
         {
             MemoryCard card = Instantiate(cardPrefab, cardBoard);
@@ -145,16 +161,9 @@ public class MemoryGameManager : MonoBehaviour
             secondCard.SetMatched();
 
             matchedPairs++;
-            UpdateUI();
-
-            if (matchedPairs == 8)
-            {
-                FinishGame();
-            }
         }
         else
         {
-            // 틀렸을 때 두 단어를 잠깐 보여준 뒤 뒤집기
             yield return new WaitForSeconds(flipBackDelay);
 
             firstCard.Hide();
@@ -163,6 +172,19 @@ public class MemoryGameManager : MonoBehaviour
 
         firstCard = null;
         secondCard = null;
+
+        UpdateUI();
+
+        // 마지막 허용 시도에 모두 맞추면 성공
+        if (matchedPairs == 8)
+        {
+            FinishGame(true);
+        }
+        else if (attempts >= maxAttempts)
+        {
+            FinishGame(false);
+        }
+
         isChecking = false;
     }
 
@@ -175,18 +197,58 @@ public class MemoryGameManager : MonoBehaviour
 
         if (attemptText != null)
         {
-            attemptText.text = "시도 : " + attempts;
+            attemptText.text =
+                "시도 : " + attempts + " / " + maxAttempts;
         }
     }
 
-    private void FinishGame()
+    private void FinishGame(bool success)
     {
+        if (isFinished)
+            return;
+
         isFinished = true;
+
+        string grade;
+
+        if (!success)
+        {
+            grade = "F";
+        }
+        else if (attempts <= aGradeMaxAttempts)
+        {
+            grade = "A";
+        }
+        else
+        {
+            grade = "B";
+        }
+
+        string title = success ? "클리어!" : "실패";
+
+        ShowResult(
+            title + "\n\n" +
+            "등급 : " + grade + "\n" +
+            "맞춘 짝 : " + matchedPairs + " / 8\n" +
+            "총 시도 : " + attempts + "회"
+        );
+
+        if (sceneFlow != null)
+        {
+            sceneFlow.OnGameFinished();
+        }
+    }
+
+    private void ShowResult(string message)
+    {
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(true);
+        }
 
         if (resultText != null)
         {
-            resultText.gameObject.SetActive(true);
-            resultText.text = "SUCCESS!\n총 " + attempts + "번 시도";
+            resultText.text = message;
         }
     }
 }

@@ -14,15 +14,29 @@ public class MashGameManager : MonoBehaviour
     public TMP_Text percentText;
     public TMP_Text countText;
     public TMP_Text timerText;
+
+    [Header("결과창")]
+    public GameObject resultPanel;
     public TMP_Text resultText;
 
     [Header("게임 설정")]
     [Range(0f, 100f)]
     public float startGauge = 30f;
 
-    public float increasePerPress = 5f;
-    public float decreasePerSecond = 10f;
+    public float increasePerPress = 3f;
+    public float decreasePerSecond = 15f;
+
+    [Min(0.1f)]
     public float timeLimit = 15f;
+
+    [Header("등급 설정")]
+    [Range(0f, 100f)]
+    public float aGradePercent = 80f;
+
+    [Range(0f, 100f)]
+    public float bGradePercent = 50f;
+
+    public MiniGameSceneFlow sceneFlow;
 
     private float currentGauge;
     private float remainingTime;
@@ -32,7 +46,7 @@ public class MashGameManager : MonoBehaviour
     private void Start()
     {
         currentGauge = Mathf.Clamp(startGauge, 0f, 100f);
-        remainingTime = Mathf.Max(0f, timeLimit);
+        remainingTime = timeLimit;
         pressCount = 0;
         isFinished = false;
 
@@ -41,9 +55,14 @@ public class MashGameManager : MonoBehaviour
         powerGauge.wholeNumbers = false;
         powerGauge.interactable = false;
 
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(false);
+        }
+
         if (resultText != null)
         {
-            resultText.gameObject.SetActive(false);
+            resultText.gameObject.SetActive(true);
         }
 
         UpdateUI();
@@ -66,36 +85,26 @@ public class MashGameManager : MonoBehaviour
 #endif
 
         if (isFinished)
-        {
-            if (restartPressed)
-            {
-                SceneManager.LoadScene(
-                    SceneManager.GetActiveScene().name
-                );
-            }
-
             return;
-        }
 
         remainingTime = Mathf.Max(
             0f,
             remainingTime - Time.deltaTime
         );
 
-        // 제한시간이 끝나면 실패
         if (remainingTime <= 0f)
         {
-            FinishGame(false);
+            FinishGame();
             return;
         }
 
-        // 매초 일정량 감소
+        // 시간이 흐르면 게이지 감소
         currentGauge = Mathf.Max(
             0f,
             currentGauge - decreasePerSecond * Time.deltaTime
         );
 
-        // 누르고 있는 동안이 아니라 새로 누를 때만 증가
+        // 스페이스바를 새로 누를 때마다 증가
         if (spacePressed)
         {
             pressCount++;
@@ -107,12 +116,6 @@ public class MashGameManager : MonoBehaviour
             );
         }
 
-        if (currentGauge >= 100f)
-        {
-            FinishGame(true);
-            return;
-        }
-
         UpdateUI();
     }
 
@@ -122,7 +125,6 @@ public class MashGameManager : MonoBehaviour
 
         if (percentText != null)
         {
-            // 성공하기 전에는 100%로 반올림되지 않게 처리
             percentText.text =
                 Mathf.FloorToInt(currentGauge) + "%";
         }
@@ -139,20 +141,49 @@ public class MashGameManager : MonoBehaviour
         }
     }
 
-    private void FinishGame(bool success)
+    private void FinishGame()
     {
+        if (isFinished)
+            return;
+
         isFinished = true;
         UpdateUI();
 
-        if (resultText != null)
-        {
-            resultText.gameObject.SetActive(true);
+        string grade;
 
-            resultText.text = success
-                ? "SUCCESS!\nPress R to restart"
-                : "GAME OVER\nPress R to restart";
+        if (currentGauge >= aGradePercent)
+        {
+            grade = "A";
+        }
+        else if (currentGauge >= bGradePercent)
+        {
+            grade = "B";
+        }
+        else
+        {
+            grade = "F";
         }
 
-        Debug.Log(success ? "전원 복구 성공!" : "전원 복구 실패!");
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(true);
+        }
+
+        if (resultText != null)
+        {
+            string title = grade == "F" ? "실패" : "클리어!";
+
+            resultText.text =
+                title + "\n\n" +
+                "등급 : " + grade + "\n" +
+                "최종 게이지 : " +
+                Mathf.FloorToInt(currentGauge) + "%\n" +
+                "연타 횟수 : " + pressCount + "회\n\n";
+        }
+
+        if (sceneFlow != null)
+        {
+            sceneFlow.OnGameFinished();
+        }
     }
 }

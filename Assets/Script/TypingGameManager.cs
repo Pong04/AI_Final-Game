@@ -14,6 +14,11 @@ public class TypingGameManager : MonoBehaviour
     public TMP_Text timerText;
     public TMP_Text scoreText;
     public TMP_Text resultText;
+    public GameObject resultPanel;
+
+    [Header("등급 설정")]
+    public int aGradeScore = 20;
+    public int bGradeScore = 10;
 
     [Header("게임 설정")]
     public int maxLives = 3;
@@ -31,6 +36,8 @@ public class TypingGameManager : MonoBehaviour
         "팀플", "과제", "시간", "대학원",
         "취업", "자소서", "교수님면담", "성적"
     };
+
+    public MiniGameSceneFlow sceneFlow;
 
     private class FallingWord
     {
@@ -54,9 +61,14 @@ public class TypingGameManager : MonoBehaviour
         remainingTime = playTime;
         score = 0;
 
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(false);
+        }
+
         if (resultText != null)
         {
-            resultText.gameObject.SetActive(false);
+            resultText.gameObject.SetActive(true);
         }
 
         typingInput.lineType = TMP_InputField.LineType.SingleLine;
@@ -241,8 +253,11 @@ public class TypingGameManager : MonoBehaviour
             scoreText.text = "SCORE : " + score;
     }
 
-    private void FinishGame(bool success)
+    private void FinishGame(bool survived)
     {
+        if (isFinished)
+            return;
+
         isFinished = true;
 
         typingInput.DeactivateInputField();
@@ -250,12 +265,51 @@ public class TypingGameManager : MonoBehaviour
 
         UpdateUI();
 
+        string grade;
+
+        if (!survived)
+        {
+            grade = "F";
+        }
+        else if (score >= aGradeScore)
+        {
+            grade = "A";
+        }
+        else if (score >= bGradeScore)
+        {
+            grade = "B";
+        }
+        else
+        {
+            grade = "F";
+        }
+
+        float elapsedTime = Mathf.Clamp(
+            playTime - remainingTime,
+            0f,
+            playTime
+        );
+
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(true);
+        }
+
         if (resultText != null)
         {
-            resultText.gameObject.SetActive(true);
-            resultText.text = success
-                ? "SUCCESS!"
-                : "GAME OVER";
+            string title = grade == "F" ? "실패" : "클리어!";
+
+            resultText.text =
+                title + "\n\n" +
+                "등급 : " + grade + "\n" +
+                "맞힌 단어 : " + score + "개\n" +
+                "남은 목숨 : " + currentLives + "\n" +
+                "생존 시간 : " + elapsedTime.ToString("F1") + "초";
+        }
+
+        if (sceneFlow != null)
+        {
+            sceneFlow.OnGameFinished();
         }
     }
 

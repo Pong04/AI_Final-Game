@@ -9,20 +9,29 @@ using UnityEngine.InputSystem;
 
 public class RunnerPlayer : MonoBehaviour
 {
+    [Header("이동")]
     public float runSpeed = 6f;
     public float jumpPower = 12f;
 
+    [Header("바닥 확인")]
     public Transform groundCheck;
     public LayerMask groundLayer;
     public float groundCheckRadius = 0.12f;
 
+    [Header("목숨")]
     public int maxLives = 3;
     public TMP_Text livesText;
     public float invincibleTime = 1f;
 
-    public float playTime = 30f;
+    [Header("제한시간")]
+    public float playTime = 60f;
     public TMP_Text timerText;
+
+    [Header("결과창")]
+    public GameObject resultPanel;
     public TMP_Text resultText;
+
+    public MiniGameSceneFlow sceneFlow;
 
     private int currentLives;
     private float remainingTime;
@@ -42,9 +51,15 @@ public class RunnerPlayer : MonoBehaviour
         currentLives = maxLives;
         remainingTime = playTime;
 
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(false);
+        }
+
+        // 기존 코드에서 꺼진 텍스트도 다시 활성화
         if (resultText != null)
         {
-            resultText.gameObject.SetActive(false);
+            resultText.gameObject.SetActive(true);
         }
 
         UpdateLivesText();
@@ -68,18 +83,8 @@ public class RunnerPlayer : MonoBehaviour
 #endif
 
         if (isFinished)
-        {
-            if (restartPressed)
-            {
-                SceneManager.LoadScene(
-                    SceneManager.GetActiveScene().name
-                );
-            }
-
             return;
-        }
 
-        // 바닥 아래로 떨어져도 실패
         if (transform.position.y < -10f)
         {
             FinishGame(false);
@@ -133,6 +138,7 @@ public class RunnerPlayer : MonoBehaviour
         if (isFinished || !other.CompareTag("Obstacle"))
             return;
 
+        // 장애물을 통과하고 계속 달리기
         other.gameObject.SetActive(false);
 
         if (isInvincible)
@@ -163,7 +169,7 @@ public class RunnerPlayer : MonoBehaviour
     {
         if (livesText != null)
         {
-            livesText.text = "HP : " + currentLives;
+            livesText.text = "LIFE : " + currentLives;
         }
     }
 
@@ -176,7 +182,7 @@ public class RunnerPlayer : MonoBehaviour
         }
     }
 
-    private void FinishGame(bool success)
+    private void FinishGame(bool survived)
     {
         if (isFinished)
             return;
@@ -189,15 +195,46 @@ public class RunnerPlayer : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
         rb.simulated = false;
 
-        if (resultText != null)
-        {
-            resultText.gameObject.SetActive(true);
+        string grade;
 
-            resultText.text = success
-                ? "SUCCESS!\nPress R to restart"
-                : "GAME OVER\nPress R to restart";
+        if (!survived)
+        {
+            grade = "F";
+        }
+        else if (currentLives == maxLives)
+        {
+            grade = "A";
+        }
+        else
+        {
+            grade = "B";
         }
 
-        Debug.Log(success ? "게임 성공!" : "게임 실패!");
+        float elapsedTime = Mathf.Clamp(
+            playTime - remainingTime,
+            0f,
+            playTime
+        );
+
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(true);
+        }
+
+        if (resultText != null)
+        {
+            string title = survived ? "클리어!" : "실패";
+
+            resultText.text =
+                title + "\n\n" +
+                "등급 : " + grade + "\n" +
+                "생존 시간 : " + elapsedTime.ToString("F1") + "초\n" +
+                "남은 목숨 : " + currentLives;
+        }
+
+        if (sceneFlow != null)
+        {
+            sceneFlow.OnGameFinished();
+        }
     }
 }
