@@ -1426,8 +1426,8 @@ MonoBehaviour:
   resultText: {fileID: 822276910}
   maxLives: 3
   playTime: 60
-  spawnInterval: 1
-  fallSpeed: 110
+  spawnInterval: 2
+  fallSpeed: 80
   words:
   - "\uC878\uC5C5\uC720\uC608"
   - "\uCD08\uACFC\uD559\uAE30"
