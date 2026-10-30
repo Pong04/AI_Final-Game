@@ -372,8 +372,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 429bd7d79665e764bac9978501307c21, type: 2}
+  m_sharedMaterial: {fileID: 6960538722796052542, guid: 429bd7d79665e764bac9978501307c21, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -405,7 +405,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -466,8 +466,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -695, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -295, y: 0}
+  m_SizeDelta: {x: 1000, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &370604144
 GameObject:
@@ -974,10 +974,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: "\uC120\uD0DD\uC9C0 2"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 429bd7d79665e764bac9978501307c21, type: 2}
+  m_sharedMaterial: {fileID: 6960538722796052542, guid: 429bd7d79665e764bac9978501307c21, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1179,12 +1179,12 @@ MonoBehaviour:
   nameText: {fileID: 1377118085}
   dialogueText: {fileID: 293743167}
   lines:
-  - speaker: pong
-    dialogue: ' fhoenfw hi wow'
-  - speaker: y
-    dialogue: wow fjdsien wow
-  - speaker: pp
-    dialogue: fhoefn hi
+  - speaker: "\uC5F0\uC6B0"
+    dialogue: "\uC640, \uC9D1 \uAC00\uACE0 \uC2F6\uB2E4"
+  - speaker: "\uC720\uBBF8"
+    dialogue: "\uC640, \uC9D1\uC774 \uBB50\uC5D0\uC5EC~?"
+  - speaker: "\uC5F0\uC6B0"
+    dialogue: "\uAE00\uC384\uC694~?"
   choicePanel: {fileID: 801640879}
   firstBranch: []
   secondBranch: []
@@ -1271,8 +1271,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 429bd7d79665e764bac9978501307c21, type: 2}
+  m_sharedMaterial: {fileID: 6960538722796052542, guid: 429bd7d79665e764bac9978501307c21, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1304,7 +1304,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -1398,10 +1398,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: "\uC120\uD0DD\uC9C0 1"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 429bd7d79665e764bac9978501307c21, type: 2}
+  m_sharedMaterial: {fileID: 6960538722796052542, guid: 429bd7d79665e764bac9978501307c21, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
