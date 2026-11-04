@@ -73,6 +73,7 @@ public class TypingGameManager : MonoBehaviour
 
         typingInput.lineType = TMP_InputField.LineType.SingleLine;
         typingInput.onSubmit.AddListener(SubmitWord);
+        typingInput.onValueChanged.AddListener(CheckSpaceSubmit);
         typingInput.SetTextWithoutNotify("");
 
         UpdateUI();
@@ -172,6 +173,26 @@ public class TypingGameManager : MonoBehaviour
             view = view,
             answer = answer.Trim()
         });
+    }
+
+    private void CheckSpaceSubmit(string text)
+    {
+        if (isFinished || isSubmitting)
+            return;
+
+        // 입력한 내용 끝에 스페이스가 있으면 제출
+        if (!text.EndsWith(" "))
+            return;
+
+        string answer = text.Trim();
+
+        // 스페이스를 제거하되 입력 이벤트를 다시 발생시키지 않음
+        typingInput.SetTextWithoutNotify(answer);
+
+        if (string.IsNullOrEmpty(answer))
+            return;
+
+        SubmitWord(answer);
     }
 
     private void SubmitWord(string submittedText)
@@ -318,6 +339,7 @@ public class TypingGameManager : MonoBehaviour
         if (typingInput != null)
         {
             typingInput.onSubmit.RemoveListener(SubmitWord);
+            typingInput.onValueChanged.RemoveListener(CheckSpaceSubmit);
         }
     }
 }
