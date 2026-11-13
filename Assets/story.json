@@ -1,0 +1,626 @@
+{
+  "episodes": [
+    {
+      "episodeName": "EP.1 지각위기",
+      "introLines": [
+        {
+          "speaker": "",
+          "dialogue": "주인공의 자취방 / 오전 8시 45분"
+        },
+        {
+          "speaker": "",
+          "dialogue": "삐비빅- 삐비빅-"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "으음… 조금만 더…"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "……어? 잠깐만."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "지금 몇 시야?!?!"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "망했다아아아!!!"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "어제 출석 조심하라고 그렇게 들었는데!!!"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "일단 학교부터 가야 해!!!"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "헉헉… 어찌저찌 정문까진 왔는데 인문대까지 왜 이렇게 먼 거야…"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "9시 1교시 전공필수… 출석 부르기까지 5분."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "이대로면 지각 확정인데 어떡하지…?! 누구한테라도 연락을 해둘까?"
+        }
+      ],
+      "choices": [
+        {
+          "text": "A. 아무에게 연락 안 하고 뛴다.",
+          "lines": [
+            {
+              "speaker": "주인공",
+              "dialogue": "연락할 시간에 한 걸음이라도 더 뛰자!"
+            }
+          ]
+        },
+        {
+          "text": "B. 동기에게 연락한다.",
+          "lines": [
+            {
+              "speaker": "주인공",
+              "dialogue": "(전화) 지훈아! 나 지금 정문인데 교수님 들어오셨어?"
+            },
+            {
+              "speaker": "지훈",
+              "dialogue": "아직! 근데 복도에서 목소리 들려. 3분 안에 와라!"
+            },
+            {
+              "speaker": "주인공",
+              "dialogue": "으아아 알았어!!"
+            }
+          ]
+        },
+        {
+          "text": "C. 교수님께 연락한다.",
+          "lines": [
+            {
+              "speaker": "주인공",
+              "dialogue": "(전화) 교수님, 안녕하세요. 저 OO입니다. 죄송하지만 오늘 조금 늦을 것 같습니다…"
+            },
+            {
+              "speaker": "교수님",
+              "dialogue": "미리 연락해줘서 고맙네. 출석 부르기 전까지만 오면 인정해주지. 서두르게."
+            },
+            {
+              "speaker": "주인공",
+              "dialogue": "네! 최대한 빨리 가겠습니다!"
+            }
+          ]
+        }
+      ],
+      "afterChoiceLines": [
+        {
+          "speaker": "",
+          "dialogue": "캠퍼스를 가로질러 강의실까지 도착하라!"
+        }
+      ],
+      "hasMinigame": true,
+      "gradeName": "출석",
+      "resultIntroLines": [
+        {
+          "speaker": "",
+          "dialogue": "결과 화면 – 출석 등급: {grade}"
+        }
+      ],
+      "resultA": [
+        {
+          "speaker": "",
+          "dialogue": "출석 부르기 전, 여유 있게 자리에 앉는 주인공"
+        },
+        {
+          "speaker": "지훈",
+          "dialogue": "(속삭이며) 오, 생각보다 빨리 왔네?"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "후… 이 정도면 선방이지."
+        }
+      ],
+      "resultB": [
+        {
+          "speaker": "",
+          "dialogue": "출석을 부르는 도중, 강의실 뒷문을 살며시 여는 주인공"
+        },
+        {
+          "speaker": "교수님",
+          "dialogue": "…OO?"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "네! 여기 있습니다!"
+        },
+        {
+          "speaker": "지훈",
+          "dialogue": "(속삭이며) 와… 진짜 간당간당했다."
+        }
+      ],
+      "resultF": [
+        {
+          "speaker": "교수님",
+          "dialogue": "OO… 출석은 이미 다 불렀네. 오늘은 지각 처리하겠네."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "(속마음) 첫 수업부터 이러면 안 되는데…"
+        }
+      ],
+      "failEndsGame": false,
+      "failEndingLines": [],
+      "outroLines": [
+        {
+          "speaker": "교수님",
+          "dialogue": "아, 그리고 다음 주부터 조별과제 시작이네. 조 편성은 오늘 저녁에 공지하겠네."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "조별과제… 출석 하나 넘기니까 산이 또 하나 있네…"
+        },
+        {
+          "speaker": "",
+          "dialogue": "EP.1 클리어!"
+        }
+      ]
+    },
+    {
+      "episodeName": "EP.2 조별과제",
+      "introLines": [
+        {
+          "speaker": "",
+          "dialogue": "일주일 후 / 주인공의 자취방, 밤 11시"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "(단톡방) 자료조사 각자 맡은 부분, 내일까지 올려주실 수 있을까요?"
+        },
+        {
+          "speaker": "조원A",
+          "dialogue": "(단톡방) 앗 죄송해요ㅠㅠ 이번 주 다른 과목 시험이 있어서…"
+        },
+        {
+          "speaker": "",
+          "dialogue": "조원B, 조원C는 읽고 답이 없다."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "공지 올린 지 사흘째인데… 마감은 금요일이고, 기말고사도 코앞이고."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "이걸… 어떻게 해야 하지?"
+        }
+      ],
+      "choices": [
+        {
+          "text": "A. 혼자 안고 다 처리한다.",
+          "lines": [
+            {
+              "speaker": "주인공",
+              "dialogue": "…그냥 내가 다 하는 게 빠르겠다. 기다리다간 마감 놓쳐."
+            },
+            {
+              "speaker": "",
+              "dialogue": "쌓여가는 에너지드링크 캔, 밤이 새도록 꺼지지 않는 노트북 불빛"
+            }
+          ]
+        },
+        {
+          "text": "B. 연락해서 조원 참여율을 높인다.",
+          "lines": [
+            {
+              "speaker": "주인공",
+              "dialogue": "(단톡방) 다들 바쁘신 거 알아요! 대신 역할을 작게 나눠볼게요. A님은 자료 2개만, B님은 표지랑 목차, C님은 결론 정리 부탁드려요. 내일 밤 9시에 10분만 줌으로 확인해요!"
+            },
+            {
+              "speaker": "조원A",
+              "dialogue": "헉 그 정도면 할 수 있어요! 내일까지 올릴게요!"
+            },
+            {
+              "speaker": "조원B",
+              "dialogue": "답 늦어서 죄송해요… 목차 제가 할게요!"
+            },
+            {
+              "speaker": "주인공",
+              "dialogue": "휴… 진작 이렇게 말할걸."
+            }
+          ]
+        }
+      ],
+      "afterChoiceLines": [
+        {
+          "speaker": "",
+          "dialogue": "마감 전까지 보고서를 완성하라!"
+        }
+      ],
+      "hasMinigame": true,
+      "gradeName": "조별과제",
+      "resultIntroLines": [
+        {
+          "speaker": "",
+          "dialogue": "결과 화면 – 조별과제 등급: {grade}"
+        }
+      ],
+      "resultA": [
+        {
+          "speaker": "",
+          "dialogue": "‘과제 제출이 완료되었습니다.’"
+        },
+        {
+          "speaker": "조원A",
+          "dialogue": "(단톡방) 와 보고서 퀄리티 미쳤다… 고생 많으셨어요!!"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "제출 완료…! 이건 진짜 잘 썼다."
+        }
+      ],
+      "resultB": [
+        {
+          "speaker": "",
+          "dialogue": "‘과제 제출이 완료되었습니다.’"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "오타가 좀 있었던 것 같은데… 그래도 냈다!"
+        }
+      ],
+      "resultF": [
+        {
+          "speaker": "",
+          "dialogue": "‘제출 기한이 지났습니다.’"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "1분… 딱 1분 늦었는데…!"
+        }
+      ],
+      "failEndsGame": true,
+      "failEndingLines": [
+        {
+          "speaker": "",
+          "dialogue": "사흘 후 / 주인공의 자취방"
+        },
+        {
+          "speaker": "학사관리처 직원",
+          "dialogue": "(전화) OO 학생, 전공필수 과목 조별과제 미제출로 F가 확정됐습니다."
+        },
+        {
+          "speaker": "학사관리처 직원",
+          "dialogue": "지난 학기 학사경고까지 누적돼서… 이번 학기 제적 대상입니다."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "제, 제적이요…? 졸업이 아니라… 제적…?"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "(멍하니) 조별과제 하나 때문에… 4년이…"
+        },
+        {
+          "speaker": "",
+          "dialogue": "ENDING 00 – 제적은 내 운명..."
+        }
+      ],
+      "outroLines": [
+        {
+          "speaker": "지훈",
+          "dialogue": "야, 조별과제 끝났다며? 고생했다. 근데 너 기말 범위 어디까지 봤어?"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "…기말? 벌써?"
+        },
+        {
+          "speaker": "지훈",
+          "dialogue": "모레야."
+        },
+        {
+          "speaker": "",
+          "dialogue": "EP.2 클리어!"
+        }
+      ]
+    },
+    {
+      "episodeName": "EP.3 기말고사",
+      "introLines": [
+        {
+          "speaker": "",
+          "dialogue": "기말고사 D-1 / 도서관 열람실, 밤 10시"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "(책장을 넘기며) 아직 범위가 반이나 남았는데… 이거 다 볼 수 있나?"
+        },
+        {
+          "speaker": "지훈",
+          "dialogue": "난 먼저 간다. 무리하지 마라. 내일 시험 보다가 졸면 끝이야."
+        },
+        {
+          "speaker": "",
+          "dialogue": "안내방송: “열람실 이용 시간이 30분 남았습니다.”"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "끝까지 다 보고 갈 거냐, 핵심만 보고 컨디션을 챙길 거냐…"
+        }
+      ],
+      "choices": [
+        {
+          "text": "A. 밤샘 공부한다.",
+          "lines": [
+            {
+              "speaker": "주인공",
+              "dialogue": "오늘 밤은 안 잔다. 범위 끝까지 간다!"
+            },
+            {
+              "speaker": "주인공",
+              "dialogue": "범위는 다 봤다… 근데 눈이… 안 떠져…"
+            }
+          ]
+        },
+        {
+          "text": "B. 피곤하니까 핵심만 보고 잔다.",
+          "lines": [
+            {
+              "speaker": "주인공",
+              "dialogue": "외운 것만이라도 확실하게 하자. 오늘은 자자."
+            },
+            {
+              "speaker": "주인공",
+              "dialogue": "개운하다! …근데 뒷부분은 거의 못 봤는데, 괜찮겠지?"
+            }
+          ]
+        }
+      ],
+      "afterChoiceLines": [
+        {
+          "speaker": "교수님",
+          "dialogue": "책상 위에 필기구만 남기게. 시험 시간은 75분, 시작하지."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "(속마음) …침착하자. 아는 것부터 맞춰 나가면 돼."
+        },
+        {
+          "speaker": "",
+          "dialogue": "개념과 정의를 짝지어 시험을 풀어라!"
+        }
+      ],
+      "hasMinigame": true,
+      "gradeName": "기말고사",
+      "resultIntroLines": [
+        {
+          "speaker": "",
+          "dialogue": "결과 화면 – 기말고사 등급: {grade}"
+        }
+      ],
+      "resultA": [
+        {
+          "speaker": "주인공",
+          "dialogue": "마지막 문제까지 다 쓰고… 검토까지 끝!"
+        },
+        {
+          "speaker": "지훈",
+          "dialogue": "표정 보니까 시험 잘 봤네?"
+        }
+      ],
+      "resultB": [
+        {
+          "speaker": "주인공",
+          "dialogue": "다 쓰긴 했는데… 두세 문제는 찍었어."
+        }
+      ],
+      "resultF": [
+        {
+          "speaker": "주인공",
+          "dialogue": "아… 마지막 장을 못 넘겼어…"
+        }
+      ],
+      "failEndsGame": false,
+      "failEndingLines": [],
+      "outroLines": [
+        {
+          "speaker": "",
+          "dialogue": "띠링- 메일 알림 ‘[졸업논문] 최종 상담 일정 안내 – 금요일 오후 2시, 교수 연구실’"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "마지막… 관문이다."
+        },
+        {
+          "speaker": "",
+          "dialogue": "EP.3 클리어!"
+        }
+      ]
+    },
+    {
+      "episodeName": "EP.4 졸업상담/졸업논문",
+      "introLines": [
+        {
+          "speaker": "",
+          "dialogue": "금요일 오후 2시 / 교수 연구실"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "교수님, OO입니다. 졸업논문 상담 받으러 왔습니다."
+        },
+        {
+          "speaker": "교수님",
+          "dialogue": "(논문을 넘기며) 음… 주제는 좋네. 그런데 3장 분석의 근거가 약해. 선행연구 비교도 빠져 있고."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "아… 네…"
+        },
+        {
+          "speaker": "교수님",
+          "dialogue": "다음 주 최종 심사 전까지 보완해 오게. 이번이 마지막 기회일세."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "일주일 안에 이걸 다 고칠 수 있을까…"
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "혼자 피드백을 분석해서 고쳐볼까, 아니면 교수님께 한 번 더 여쭤볼까?"
+        }
+      ],
+      "choices": [
+        {
+          "text": "A. 피드백을 직접 분석해 수정한다.",
+          "lines": [
+            {
+              "speaker": "주인공",
+              "dialogue": "‘근거가 약하다’는 건… 데이터가 부족하다는 뜻이겠지? 일단 내가 해보자."
+            }
+          ]
+        },
+        {
+          "text": "B. 교수님에게 추가 상담을 요청한다.",
+          "lines": [
+            {
+              "speaker": "주인공",
+              "dialogue": "교수님, 피드백 주신 3장 관련해서 10분만 더 여쭤봐도 될까요?"
+            },
+            {
+              "speaker": "교수님",
+              "dialogue": "물론이지. 이렇게 다시 찾아오는 학생이 오히려 반갑네. 이 논문 두 편을 참고해 보게."
+            }
+          ]
+        }
+      ],
+      "afterChoiceLines": [
+        {
+          "speaker": "",
+          "dialogue": "일주일 후 / 졸업논문 최종 심사장"
+        },
+        {
+          "speaker": "교수님",
+          "dialogue": "그럼 발표 시작하지. 질문은 발표 후에 받겠네."
+        },
+        {
+          "speaker": "",
+          "dialogue": "쏟아지는 질문을 피하며 끝까지 버텨라!"
+        }
+      ],
+      "hasMinigame": true,
+      "gradeName": "졸업논문",
+      "resultIntroLines": [
+        {
+          "speaker": "",
+          "dialogue": "결과 화면 – 졸업논문 등급: {grade}"
+        }
+      ],
+      "resultA": [
+        {
+          "speaker": "교수님",
+          "dialogue": "질문에 막힘이 없군. 지난번과는 완전히 다른 논문이야."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "가, 감사합니다!!"
+        }
+      ],
+      "resultB": [
+        {
+          "speaker": "교수님",
+          "dialogue": "몇 군데 아쉽지만… 통과로 하지. 수고했네."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "(속마음) 휴… 살았다."
+        }
+      ],
+      "resultF": [
+        {
+          "speaker": "교수님",
+          "dialogue": "…아직 보완할 부분이 많군. 이대로는 통과가 어렵겠네."
+        },
+        {
+          "speaker": "주인공",
+          "dialogue": "……"
+        }
+      ],
+      "failEndsGame": false,
+      "failEndingLines": [],
+      "outroLines": [
+        {
+          "speaker": "주인공",
+          "dialogue": "출석, 팀플, 시험, 논문… 할 수 있는 건 다 했어. 이제 결과만 남았다."
+        }
+      ]
+    }
+  ],
+  "finalIntroLines": [
+    {
+      "speaker": "학사관리처 직원",
+      "dialogue": "OO 학생, 최종 성적 확인됐습니다."
+    },
+    {
+      "speaker": "",
+      "dialogue": "최종 성적표 – {report}"
+    }
+  ],
+  "endingGraduate": [
+    {
+      "speaker": "학사관리처 직원",
+      "dialogue": "축하합니다. 졸업 요건 모두 충족입니다."
+    },
+    {
+      "speaker": "주인공",
+      "dialogue": "…진짜요? 진짜로요?!"
+    },
+    {
+      "speaker": "주인공",
+      "dialogue": "무사히… 졸업했다!!!"
+    },
+    {
+      "speaker": "",
+      "dialogue": "ENDING 01 – 무사히 졸업"
+    }
+  ],
+  "endingRepeat": [
+    {
+      "speaker": "학사관리처 직원",
+      "dialogue": "…아쉽지만 졸업 기준에 미달입니다. 다음 학기에 추가 등록하셔야 해요."
+    },
+    {
+      "speaker": "주인공",
+      "dialogue": "한 학기만… 더…"
+    },
+    {
+      "speaker": "주인공",
+      "dialogue": "(주먹을 불끈 쥐며) …다음 학기엔, 진짜로 무사히 졸업한다!!!"
+    },
+    {
+      "speaker": "",
+      "dialogue": "ENDING 02 – 한 학기만 더..."
+    }
+  ],
+  "endingExcellent": [
+    {
+      "speaker": "학사관리처 직원",
+      "dialogue": "축하합니다. 성적이 아주 우수하네요. 졸업입니다."
+    },
+    {
+      "speaker": "교수님",
+      "dialogue": "잘 버텼네, OO. 혹시 대학원 생각 있으면 연락하게. 자네 같은 학생이 필요하거든."
+    },
+    {
+      "speaker": "주인공",
+      "dialogue": "네…? 대, 대학원이요…?"
+    },
+    {
+      "speaker": "",
+      "dialogue": "1년 후 / 연구실, 새벽 2시. 논문 더미 사이에서 졸고 있는 주인공"
+    },
+    {
+      "speaker": "",
+      "dialogue": "ENDING 03 – 끝나지 않은 대학 생활"
+    }
+  ]
+}
