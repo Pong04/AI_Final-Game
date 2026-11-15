@@ -871,8 +871,7 @@ MonoBehaviour:
   increasePerPress: 3
   decreasePerSecond: 15
   timeLimit: 15
-  aGradePercent: 80
-  bGradePercent: 50
+  checkpointPercent: 50
   sceneFlow: {fileID: 0}
 --- !u!4 &698427999
 Transform:
@@ -1949,7 +1948,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "SPACE \uC5F0\uD0C0\uB85C \uC804\uC6D0\uC744 \uBCF5\uAD6C\uD558\uC138\uC694!"
+  m_text: "SPACE 연타로 전원을 50% 이상으로 유지하세요!"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 429bd7d79665e764bac9978501307c21, type: 2}
   m_sharedMaterial: {fileID: 6960538722796052542, guid: 429bd7d79665e764bac9978501307c21, type: 2}

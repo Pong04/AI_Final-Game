@@ -155,8 +155,8 @@ MonoBehaviour:
   resultPanel: {fileID: 1927481804}
   resultText: {fileID: 338701527}
   flipBackDelay: 0.8
-  aGradeMaxAttempts: 12
-  maxAttempts: 20
+  timeLimit: 60
+  previewTime: 7
   words:
   - "\uC0AC\uACFC"
   - "\uBC14\uB2E4"

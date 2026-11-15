@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class TypingGameManager : MonoBehaviour
 {
-    [Header("UI ¿¬°á")]
+    [Header("UI ì—°ê²°")]
     public RectTransform wordArea;
     public TMP_Text wordPrefab;
     public TMP_InputField typingInput;
@@ -16,11 +16,7 @@ public class TypingGameManager : MonoBehaviour
     public TMP_Text resultText;
     public GameObject resultPanel;
 
-    [Header("µî±Ş ¼³Á¤")]
-    public int aGradeScore = 20;
-    public int bGradeScore = 10;
-
-    [Header("°ÔÀÓ ¼³Á¤")]
+    [Header("ê²Œì„ ì„¤ì •")]
     public int maxLives = 3;
     public float playTime = 60f;
 
@@ -29,12 +25,12 @@ public class TypingGameManager : MonoBehaviour
 
     public float fallSpeed = 80f;
 
-    [Header("ÃâÁ¦ ´Ü¾î")]
+    [Header("ì¶œì œ ë‹¨ì–´")]
     public string[] words =
     {
-        "Á¹¾÷À¯¿¹", "ÃÊ°úÇĞ±â", "È­¼®", "³«Á¦",
-        "ÆÀÇÃ", "°úÁ¦", "½Ã°£", "´ëÇĞ¿ø",
-        "Ãë¾÷", "ÀÚ¼Ò¼­", "±³¼ö´Ô¸é´ã", "¼ºÀû"
+        "ì¡¸ì—…ìœ ì˜ˆ", "ì´ˆê³¼í•™ê¸°", "í™”ì„", "ë‚™ì œ",
+        "íŒ€í”Œ", "ê³¼ì œ", "ì‹œê°„", "ëŒ€í•™ì›",
+        "ì·¨ì—…", "ìì†Œì„œ", "êµìˆ˜ë‹˜ë©´ë‹´", "ì„±ì "
     };
 
     public MiniGameSceneFlow sceneFlow;
@@ -84,6 +80,9 @@ public class TypingGameManager : MonoBehaviour
 
     private void Update()
     {
+        if (SettingsMenu.BlocksGameplay)
+            return;
+
         if (isFinished)
             return;
 
@@ -92,7 +91,7 @@ public class TypingGameManager : MonoBehaviour
             remainingTime - Time.deltaTime
         );
 
-        // ´Ü¾î¸¦ ¾Æ·¡·Î ÀÌµ¿
+        // ë‹¨ì–´ë¥¼ ì•„ë˜ë¡œ ì´ë™
         for (int i = activeWords.Count - 1; i >= 0; i--)
         {
             FallingWord word = activeWords[i];
@@ -101,7 +100,7 @@ public class TypingGameManager : MonoBehaviour
             rect.anchoredPosition +=
                 Vector2.down * fallSpeed * Time.deltaTime;
 
-            // ´Ü¾î ¾Æ·¡ÂÊÀÌ ¿µ¿ª ¹Ù´Ú¿¡ ´êÀ¸¸é ¸ñ¼û °¨¼Ò
+            // ë‹¨ì–´ ì•„ë˜ìª½ì´ ì˜ì—­ ë°”ë‹¥ì— ë‹¿ìœ¼ë©´ ëª©ìˆ¨ ê°ì†Œ
             if (rect.anchoredPosition.y -
                 rect.rect.height * 0.5f <= 0f)
             {
@@ -149,7 +148,7 @@ public class TypingGameManager : MonoBehaviour
 
         RectTransform rect = view.rectTransform;
 
-        // WordAreaÀÇ ¿ŞÂÊ ¾Æ·¡¸¦ ÁÂÇ¥ ±âÁØÀ¸·Î »ç¿ë
+        // WordAreaì˜ ì™¼ìª½ ì•„ë˜ë¥¼ ì¢Œí‘œ ê¸°ì¤€ìœ¼ë¡œ ì‚¬ìš©
         rect.anchorMin = Vector2.zero;
         rect.anchorMax = Vector2.zero;
         rect.pivot = new Vector2(0.5f, 0.5f);
@@ -177,16 +176,16 @@ public class TypingGameManager : MonoBehaviour
 
     private void CheckSpaceSubmit(string text)
     {
-        if (isFinished || isSubmitting)
+        if (SettingsMenu.BlocksGameplay || isFinished || isSubmitting)
             return;
 
-        // ÀÔ·ÂÇÑ ³»¿ë ³¡¿¡ ½ºÆäÀÌ½º°¡ ÀÖÀ¸¸é Á¦Ãâ
+        // ì…ë ¥í•œ ë‚´ìš© ëì— ìŠ¤í˜ì´ìŠ¤ê°€ ìˆìœ¼ë©´ ì œì¶œ
         if (!text.EndsWith(" "))
             return;
 
         string answer = text.Trim();
 
-        // ½ºÆäÀÌ½º¸¦ Á¦°ÅÇÏµÇ ÀÔ·Â ÀÌº¥Æ®¸¦ ´Ù½Ã ¹ß»ı½ÃÅ°Áö ¾ÊÀ½
+        // ìŠ¤í˜ì´ìŠ¤ë¥¼ ì œê±°í•˜ë˜ ì…ë ¥ ì´ë²¤íŠ¸ë¥¼ ë‹¤ì‹œ ë°œìƒì‹œí‚¤ì§€ ì•ŠìŒ
         typingInput.SetTextWithoutNotify(answer);
 
         if (string.IsNullOrEmpty(answer))
@@ -197,7 +196,7 @@ public class TypingGameManager : MonoBehaviour
 
     private void SubmitWord(string submittedText)
     {
-        if (isFinished || isSubmitting)
+        if (SettingsMenu.BlocksGameplay || isFinished || isSubmitting)
             return;
 
         StartCoroutine(CheckAnswer(submittedText));
@@ -207,8 +206,10 @@ public class TypingGameManager : MonoBehaviour
     {
         isSubmitting = true;
 
-        // ÀÔ·ÂÃ¢ÀÇ ÇØ´ç ÇÁ·¹ÀÓ Ã³¸®°¡ ³¡³­ µÚ È®ÀÎ
+        // ì…ë ¥ì°½ì˜ í•´ë‹¹ í”„ë ˆì„ ì²˜ë¦¬ê°€ ëë‚œ ë’¤ í™•ì¸
         yield return null;
+        while (SettingsMenu.BlocksGameplay)
+            yield return null;
 
         if (isFinished)
         {
@@ -234,7 +235,7 @@ public class TypingGameManager : MonoBehaviour
             float y = activeWords[i].view
                 .rectTransform.anchoredPosition.y;
 
-            // µ¿ÀÏÇÑ ´Ü¾î Áß °¡Àå ¾Æ·¡ÀÇ ´Ü¾î ¼±ÅÃ
+            // ë™ì¼í•œ ë‹¨ì–´ ì¤‘ ê°€ì¥ ì•„ë˜ì˜ ë‹¨ì–´ ì„ íƒ
             if (y < lowestY)
             {
                 lowestY = y;
@@ -286,24 +287,7 @@ public class TypingGameManager : MonoBehaviour
 
         UpdateUI();
 
-        string grade;
-
-        if (!survived)
-        {
-            grade = "F";
-        }
-        else if (score >= aGradeScore)
-        {
-            grade = "A";
-        }
-        else if (score >= bGradeScore)
-        {
-            grade = "B";
-        }
-        else
-        {
-            grade = "F";
-        }
+        Grade grade = StoryRules.GradeForHearts(currentLives);
 
         float elapsedTime = Mathf.Clamp(
             playTime - remainingTime,
@@ -318,19 +302,19 @@ public class TypingGameManager : MonoBehaviour
 
         if (resultText != null)
         {
-            string title = grade == "F" ? "½ÇÆĞ" : "Å¬¸®¾î!";
+            string title = survived ? "í´ë¦¬ì–´!" : "ì‹¤íŒ¨";
 
             resultText.text =
                 title + "\n\n" +
-                "µî±Ş : " + grade + "\n" +
-                "¸ÂÈù ´Ü¾î : " + score + "°³\n" +
-                "³²Àº ¸ñ¼û : " + currentLives + "\n" +
-                "»ıÁ¸ ½Ã°£ : " + elapsedTime.ToString("F1") + "ÃÊ";
+                "ë“±ê¸‰ : " + grade + "\n" +
+                "ë§íŒ ë‹¨ì–´ : " + score + "ê°œ\n" +
+                "ë‚¨ì€ ëª©ìˆ¨ : " + currentLives + "\n" +
+                "ìƒì¡´ ì‹œê°„ : " + elapsedTime.ToString("F1") + "ì´ˆ";
         }
 
         if (sceneFlow != null)
         {
-            sceneFlow.OnGameFinished();
+            sceneFlow.OnGameFinished(currentLives);
         }
     }
 

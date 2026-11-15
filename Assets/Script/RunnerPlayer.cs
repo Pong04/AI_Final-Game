@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using TMPro;
 
 #if ENABLE_INPUT_SYSTEM
@@ -9,25 +8,27 @@ using UnityEngine.InputSystem;
 
 public class RunnerPlayer : MonoBehaviour
 {
-    [Header("ÀÌµ¿")]
+    [Header("ì´ë™")]
     public float runSpeed = 6f;
     public float jumpPower = 12f;
 
-    [Header("¹Ù´Ú È®ÀÎ")]
+    [Header("ë°”ë‹¥ í™•ì¸")]
     public Transform groundCheck;
     public LayerMask groundLayer;
     public float groundCheckRadius = 0.12f;
 
-    [Header("¸ñ¼û")]
+    [Header("ëª©ìˆ¨")]
     public int maxLives = 3;
     public TMP_Text livesText;
     public float invincibleTime = 1f;
 
-    [Header("Á¦ÇÑ½Ã°£")]
+    [Header("ì œí•œì‹œê°„")]
     public float playTime = 60f;
     public TMP_Text timerText;
+    [Min(0f)] public float finishDistance;
+    [Min(0f)] public float hitSlowdownTime = 1.5f;
 
-    [Header("°á°úÃ¢")]
+    [Header("ê²°ê³¼ì°½")]
     public GameObject resultPanel;
     public TMP_Text resultText;
 
@@ -35,6 +36,8 @@ public class RunnerPlayer : MonoBehaviour
 
     private int currentLives;
     private float remainingTime;
+    private float startX;
+    private float resumeRunningAt;
 
     private Rigidbody2D rb;
     private bool jumpRequested;
@@ -50,13 +53,14 @@ public class RunnerPlayer : MonoBehaviour
     {
         currentLives = maxLives;
         remainingTime = playTime;
+        startX = transform.position.x;
 
         if (resultPanel != null)
         {
             resultPanel.SetActive(false);
         }
 
-        // ±âÁ¸ ÄÚµå¿¡¼­ ²¨Áø ÅØ½ºÆ®µµ ´Ù½Ã È°¼ºÈ­
+        // ê¸°ì¡´ ì½”ë“œì—ì„œ êº¼ì§„ í…ìŠ¤íŠ¸ë„ ë‹¤ì‹œ í™œì„±í™”
         if (resultText != null)
         {
             resultText.gameObject.SetActive(true);
@@ -68,18 +72,17 @@ public class RunnerPlayer : MonoBehaviour
 
     private void Update()
     {
+        if (SettingsMenu.BlocksGameplay)
+            return;
+
         bool jumpPressed;
-        bool restartPressed;
 
 #if ENABLE_INPUT_SYSTEM
         jumpPressed = Keyboard.current != null &&
                       Keyboard.current.spaceKey.wasPressedThisFrame;
 
-        restartPressed = Keyboard.current != null &&
-                         Keyboard.current.rKey.wasPressedThisFrame;
 #else
         jumpPressed = Input.GetKeyDown(KeyCode.Space);
-        restartPressed = Input.GetKeyDown(KeyCode.R);
 #endif
 
         if (isFinished)
@@ -98,9 +101,15 @@ public class RunnerPlayer : MonoBehaviour
 
         UpdateTimerText();
 
-        if (remainingTime <= 0f)
+        if (finishDistance > 0f && transform.position.x - startX >= finishDistance)
         {
             FinishGame(true);
+            return;
+        }
+
+        if (remainingTime <= 0f)
+        {
+            FinishGame(finishDistance <= 0f);
             return;
         }
 
@@ -112,7 +121,7 @@ public class RunnerPlayer : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (isFinished)
+        if (SettingsMenu.BlocksGameplay || isFinished)
             return;
 
         bool isGrounded = Physics2D.OverlapCircle(
@@ -122,7 +131,7 @@ public class RunnerPlayer : MonoBehaviour
         ) != null;
 
         Vector2 velocity = rb.linearVelocity;
-        velocity.x = runSpeed;
+        velocity.x = Time.time >= resumeRunningAt ? runSpeed : 0f;
 
         if (jumpRequested && isGrounded)
         {
@@ -135,14 +144,17 @@ public class RunnerPlayer : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (isFinished || !other.CompareTag("Obstacle"))
+        if (SettingsMenu.IsPaused || isFinished || !other.CompareTag("Obstacle"))
             return;
 
-        // Àå¾Ö¹°À» Åë°úÇÏ°í °è¼Ó ´Ş¸®±â
+        // ì¥ì• ë¬¼ì„ í†µê³¼í•˜ê³  ê³„ì† ë‹¬ë¦¬ê¸°
         other.gameObject.SetActive(false);
 
         if (isInvincible)
             return;
+
+        if (finishDistance > 0f)
+            resumeRunningAt = Time.time + hitSlowdownTime;
 
         currentLives = Mathf.Max(0, currentLives - 1);
         UpdateLivesText();
@@ -179,6 +191,11 @@ public class RunnerPlayer : MonoBehaviour
         {
             timerText.text =
                 "TIME : " + Mathf.CeilToInt(remainingTime);
+            if (finishDistance > 0f)
+            {
+                float distance = Mathf.Max(0f, finishDistance - (transform.position.x - startX));
+                timerText.text += " / ë„ì°©ê¹Œì§€ " + Mathf.CeilToInt(distance) + "m";
+            }
         }
     }
 
@@ -195,20 +212,13 @@ public class RunnerPlayer : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
         rb.simulated = false;
 
-        string grade;
-
         if (!survived)
         {
-            grade = "F";
+            currentLives = 0;
+            UpdateLivesText();
         }
-        else if (currentLives == maxLives)
-        {
-            grade = "A";
-        }
-        else
-        {
-            grade = "B";
-        }
+
+        Grade grade = StoryRules.GradeForHearts(currentLives);
 
         float elapsedTime = Mathf.Clamp(
             playTime - remainingTime,
@@ -223,18 +233,18 @@ public class RunnerPlayer : MonoBehaviour
 
         if (resultText != null)
         {
-            string title = survived ? "Å¬¸®¾î!" : "½ÇÆĞ";
+            string title = survived ? "í´ë¦¬ì–´!" : "ì‹¤íŒ¨";
 
             resultText.text =
                 title + "\n\n" +
-                "µî±Ş : " + grade + "\n" +
-                "»ıÁ¸ ½Ã°£ : " + elapsedTime.ToString("F1") + "ÃÊ\n" +
-                "³²Àº ¸ñ¼û : " + currentLives;
+                "ë“±ê¸‰ : " + grade + "\n" +
+                "ìƒì¡´ ì‹œê°„ : " + elapsedTime.ToString("F1") + "ì´ˆ\n" +
+                "ë‚¨ì€ ëª©ìˆ¨ : " + currentLives;
         }
 
         if (sceneFlow != null)
         {
-            sceneFlow.OnGameFinished();
+            sceneFlow.OnGameFinished(currentLives);
         }
     }
 }

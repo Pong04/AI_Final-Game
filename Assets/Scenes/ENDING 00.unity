@@ -250,7 +250,6 @@ MonoBehaviour:
   choicePanel: {fileID: 0}
   firstBranch: []
   secondBranch: []
-  typingSpeed: 0.05
 --- !u!4 &247556895
 Transform:
   m_ObjectHideFlags: 0

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
@@ -84,21 +85,19 @@ public class DialogueManager : MonoBehaviour
     public TextAsset storyJson;             // story.json
     public StoryData story;
 
-    [Header("미니게임 (에피소드 순서대로, Element 0 = EP.1)")]
-    public GameObject[] minigames;
-    [Tooltip("미니게임 칸이 비어 있을 때 대신 사용할 테스트 등급")]
-    public Grade testGrade = Grade.A;
-
-    [Header("엔딩 조건")]
-    [Tooltip("A=2점, B=1점, F=0점.\nF가 하나라도 있으면 ENDING 02\n점수가 이 값 이상이면 ENDING 03\n나머지는 ENDING 01")]
-    public int excellentScore = 7;
+    [Header("미니게임 선택지 보정")]
+    [Min(0f)] public float runnerTimeChange = 5f;
+    [Min(0f)] public float examTimeChange = 5f;
+    [Min(1f)] public float hardMashDecayMultiplier = 1.15f;
+    [Min(0f)] public float hardCardPreviewTime = 4f;
+    [Min(1f)] public float hardTypingSpeedMultiplier = 1.25f;
+    [Min(0f)] public float resultDisplayTime = 3f;
 
     [Header("설정")]
     [Tooltip("대사 속 'OO'을 이 이름으로 바꿔줌")]
     public string playerName = "OO";
     public bool italicNarration = true;
     [Min(0)] public int startEpisodeIndex = 0;  // 테스트용 (0 = EP.1)
-    [Min(0.001f)] public float typingSpeed = 0.05f;
 
     [Header("게임이 완전히 끝났을 때 (타이틀로 가기 등)")]
     public UnityEvent onGameEnd;
@@ -122,17 +121,19 @@ public class DialogueManager : MonoBehaviour
 
     private Grade[] grades;
     private bool[] hasGrade;
+    private int[] points;
+    private int professorAffinity;
+    private float examTimeBonus;
     private int[] choicesMade;
+    private Scene minigameScene;
+    private bool minigameConfigured;
+    private readonly List<GameObject> pausedStoryRoots = new List<GameObject>();
 
     // ───────── 시작 ─────────
 
     private void Start()
     {
         if (choicePanel != null) choicePanel.SetActive(false);
-
-        if (minigames != null)
-            foreach (GameObject mg in minigames)
-                if (mg != null) mg.SetActive(false);
 
         // Inspector가 비어 있으면 JSON에서 바로 읽기
         if ((story == null || story.episodes == null || story.episodes.Length == 0) && storyJson != null)
@@ -148,6 +149,7 @@ public class DialogueManager : MonoBehaviour
         int count = story.episodes.Length;
         grades = new Grade[count];
         hasGrade = new bool[count];
+        points = new int[count];
         choicesMade = new int[count];
         for (int i = 0; i < count; i++) choicesMade[i] = -1;
 
@@ -240,6 +242,11 @@ public class DialogueManager : MonoBehaviour
                     phase = Phase.MidEnding;
                     PlayLines(ep.failEndingLines);
                 }
+                else if (grades[episodeIndex] == Grade.F && episodeIndex == 3)
+                {
+                    phase = Phase.FinalEnding;
+                    PlayLines(story.endingRepeat);
+                }
                 else
                 {
                     phase = Phase.Outro;
@@ -295,28 +302,48 @@ public class DialogueManager : MonoBehaviour
         dialogueText.text = text;
         dialogueText.ForceMeshUpdate();
 
-        isTyping = true;
-        typingCoroutine = StartCoroutine(TypeDialogue());
+        int totalCharacters = dialogueText.textInfo.characterCount;
+        isTyping = totalCharacters > 1 && GamePreferences.DialogueDelay > 0f;
+        if (isTyping)
+            typingCoroutine = StartCoroutine(TypeDialogue(totalCharacters));
+        else
+            dialogueText.maxVisibleCharacters = int.MaxValue;
     }
 
-    private IEnumerator TypeDialogue()
+    private IEnumerator TypeDialogue(int totalCharacters)
     {
-        int totalCharacters = dialogueText.textInfo.characterCount;
+        int visible = 1;
+        float elapsed = 0f;
+        dialogueText.maxVisibleCharacters = visible;
 
-        for (int i = 1; i <= totalCharacters; i++)
+        while (visible < totalCharacters)
         {
-            dialogueText.maxVisibleCharacters = i;
-            if (i < totalCharacters)
-                yield return new WaitForSecondsRealtime(typingSpeed);
+            yield return null;
+            if (SettingsMenu.BlocksGameplay)
+                continue;
+
+            float delay = GamePreferences.DialogueDelay;
+            if (delay <= 0f)
+                break;
+
+            elapsed += Time.deltaTime;
+            while (elapsed >= delay && visible < totalCharacters)
+            {
+                elapsed -= delay;
+                visible++;
+            }
+
+            dialogueText.maxVisibleCharacters = visible;
         }
 
+        dialogueText.maxVisibleCharacters = int.MaxValue;
         isTyping = false;
         typingCoroutine = null;
     }
 
     public void NextDialogue()
     {
-        if (isFinished || isChoosing || isWaitingMinigame)
+        if (SettingsMenu.BlocksGameplay || isFinished || isChoosing || isWaitingMinigame || currentLines == null)
             return;
 
         if (isTyping)
@@ -350,7 +377,7 @@ public class DialogueManager : MonoBehaviour
         if (s.Contains("{grade}"))
         {
             string g = (episodeIndex < hasGrade.Length && hasGrade[episodeIndex])
-                ? grades[episodeIndex].ToString() : "-";
+                ? $"{grades[episodeIndex]} ({points[episodeIndex]}점)" : "-";
             s = s.Replace("{grade}", g);
         }
 
@@ -369,9 +396,9 @@ public class DialogueManager : MonoBehaviour
         for (int i = 0; i < story.episodes.Length; i++)
         {
             if (story.episodes[i].hasMinigame && hasGrade[i])
-                parts.Add($"{story.episodes[i].gradeName} {grades[i]}");
+                parts.Add($"{story.episodes[i].gradeName} {grades[i]} ({points[i]}점)");
         }
-        return string.Join(" / ", parts);
+        return string.Join(" / ", parts) + $"\n총점 {TotalScore()} / 400 · 교수님 호감도 {professorAffinity} / 2";
     }
 
     // ───────── 선택지 ─────────
@@ -400,7 +427,7 @@ public class DialogueManager : MonoBehaviour
     // 버튼 OnClick에 연결: A 버튼 → 0, B 버튼 → 1, C 버튼 → 2
     public void SelectChoice(int choiceIndex)
     {
-        if (!isChoosing) return;
+        if (SettingsMenu.BlocksGameplay || !isChoosing) return;
 
         Episode ep = CurrentEpisode;
         if (choiceIndex < 0 || choiceIndex >= ep.choices.Length) return;
@@ -408,6 +435,11 @@ public class DialogueManager : MonoBehaviour
         if (choicePanel != null) choicePanel.SetActive(false);
         isChoosing = false;
         choicesMade[episodeIndex] = choiceIndex;
+
+        if ((episodeIndex == 0 && choiceIndex == 2) || (episodeIndex == 3 && choiceIndex == 1))
+            professorAffinity = Mathf.Min(2, professorAffinity + 1);
+        if (episodeIndex == 1)
+            examTimeBonus = choiceIndex == 0 ? -examTimeChange : examTimeChange;
 
         phase = Phase.Branch;
         PlayLines(ep.choices[choiceIndex].lines);
@@ -429,45 +461,155 @@ public class DialogueManager : MonoBehaviour
         isWaitingMinigame = true;
         dialoguePanel.SetActive(false);
 
-        GameObject mg = GetMinigameObject(episodeIndex);
-        if (mg != null)
+        StartCoroutine(LoadMinigame("MiniGame" + (episodeIndex + 1)));
+    }
+
+    private IEnumerator LoadMinigame(string sceneName)
+    {
+        if (!Application.CanStreamedLevelBeLoaded(sceneName))
         {
-            mg.SetActive(true);
+            StopForMinigameError($"빌드 목록에 {sceneName} 씬이 없습니다.");
+            yield break;
         }
-        else
+
+        foreach (GameObject root in gameObject.scene.GetRootGameObjects())
         {
-            Debug.LogWarning($"{ep.episodeName}: 미니게임 오브젝트가 없어서 테스트 등급 {testGrade}(으)로 진행해요.");
-            FinishMinigame(testGrade);
+            if (root == transform.root.gameObject || !root.activeSelf)
+                continue;
+
+            pausedStoryRoots.Add(root);
+            root.SetActive(false);
+        }
+
+        minigameConfigured = false;
+        SceneManager.sceneLoaded += ConfigureMinigame;
+        AsyncOperation load = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+        if (load != null)
+            yield return load;
+
+        SceneManager.sceneLoaded -= ConfigureMinigame;
+        if (!minigameConfigured)
+        {
+            if (minigameScene.IsValid() && minigameScene.isLoaded)
+                yield return SceneManager.UnloadSceneAsync(minigameScene);
+
+            RestoreStory();
+            StopForMinigameError($"{sceneName}의 미니게임 매니저를 찾지 못했습니다.");
         }
     }
 
-    // 미니게임이 끝나면 미니게임 스크립트에서 호출
-    public void FinishMinigame(Grade grade)
+    // sceneLoaded는 미니게임 매니저의 Start 전에 호출된다.
+    private void ConfigureMinigame(Scene scene, LoadSceneMode mode)
     {
-        if (!isWaitingMinigame) return;
+        if (mode != LoadSceneMode.Additive || scene.name != "MiniGame" + (episodeIndex + 1))
+            return;
+
+        minigameScene = scene;
+        SceneManager.SetActiveScene(scene);
+        int choice = GetChoice(episodeIndex);
+
+        switch (episodeIndex)
+        {
+            case 0:
+                RunnerPlayer runner = FindInScene<RunnerPlayer>(scene);
+                if (runner == null) return;
+                runner.maxLives = StoryRules.FullHearts;
+                runner.playTime = Mathf.Max(1f, runner.playTime +
+                    (choice == 0 ? runnerTimeChange : choice > 0 ? -runnerTimeChange : 0f));
+                runner.sceneFlow = ConnectMinigame(runner, runner.sceneFlow);
+                break;
+
+            case 1:
+                MashGameManager mash = FindInScene<MashGameManager>(scene);
+                if (mash == null) return;
+                if (choice == 0)
+                    mash.decreasePerSecond *= hardMashDecayMultiplier;
+                mash.sceneFlow = ConnectMinigame(mash, mash.sceneFlow);
+                break;
+
+            case 2:
+                MemoryGameManager memory = FindInScene<MemoryGameManager>(scene);
+                if (memory == null) return;
+                float studyTimeChange = choice == 0 ? -examTimeChange : 0f;
+                memory.timeLimit = Mathf.Max(1f, memory.timeLimit + examTimeBonus + studyTimeChange);
+                if (choice == 1)
+                    memory.previewTime = Mathf.Min(memory.previewTime, hardCardPreviewTime);
+                memory.sceneFlow = ConnectMinigame(memory, memory.sceneFlow);
+                break;
+
+            case 3:
+                TypingGameManager typing = FindInScene<TypingGameManager>(scene);
+                if (typing == null) return;
+                typing.maxLives = StoryRules.FullHearts;
+                if (choice == 0)
+                    typing.fallSpeed *= hardTypingSpeedMultiplier;
+                typing.sceneFlow = ConnectMinigame(typing, typing.sceneFlow);
+                break;
+
+            default:
+                return;
+        }
+
+        minigameConfigured = true;
+    }
+
+    private static T FindInScene<T>(Scene scene) where T : Component
+    {
+        foreach (GameObject root in scene.GetRootGameObjects())
+        {
+            T component = root.GetComponentInChildren<T>();
+            if (component != null) return component;
+        }
+
+        return null;
+    }
+
+    private MiniGameSceneFlow ConnectMinigame(Component manager, MiniGameSceneFlow flow)
+    {
+        if (flow == null)
+            flow = manager.gameObject.AddComponent<MiniGameSceneFlow>();
+
+        flow.delay = resultDisplayTime;
+        flow.ReturnToStory = hearts => StartCoroutine(ReturnFromMinigame(hearts));
+        return flow;
+    }
+
+    private IEnumerator ReturnFromMinigame(int hearts)
+    {
+        SceneManager.SetActiveScene(gameObject.scene);
+        yield return SceneManager.UnloadSceneAsync(minigameScene);
+        RestoreStory();
         isWaitingMinigame = false;
 
-        GameObject mg = GetMinigameObject(episodeIndex);
-        if (mg != null) mg.SetActive(false);
-
-        grades[episodeIndex] = grade;
+        grades[episodeIndex] = StoryRules.GradeForHearts(hearts);
+        points[episodeIndex] = StoryRules.PointsForHearts(hearts);
         hasGrade[episodeIndex] = true;
-        Debug.Log($"{CurrentEpisode.gradeName} 등급: {grade}");
 
         phase = Phase.ResultIntro;
         PlayLines(CurrentEpisode.resultIntroLines);
     }
 
-    // 버튼 OnClick용: 0 = A, 1 = B, 2 = F
-    public void FinishMinigameByIndex(int gradeIndex)
+    private void RestoreStory()
     {
-        FinishMinigame((Grade)Mathf.Clamp(gradeIndex, 0, 2));
+        SceneManager.SetActiveScene(gameObject.scene);
+        foreach (GameObject root in pausedStoryRoots)
+            if (root != null) root.SetActive(true);
+        pausedStoryRoots.Clear();
     }
 
-    private GameObject GetMinigameObject(int index)
+    private void StopForMinigameError(string message)
     {
-        if (minigames == null || index >= minigames.Length) return null;
-        return minigames[index];
+        Debug.LogError(message, this);
+        dialoguePanel.SetActive(true);
+        nameText.text = "";
+        dialogueText.maxVisibleCharacters = int.MaxValue;
+        dialogueText.text = message;
+        isFinished = true;
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= ConfigureMinigame;
     }
 
     private DialogueLine[] GetResultLines(Episode ep, Grade grade)
@@ -482,23 +624,22 @@ public class DialogueManager : MonoBehaviour
 
     // ───────── 엔딩 ─────────
 
+    private int TotalScore()
+    {
+        int total = 0;
+        foreach (int score in points)
+            total += score;
+        return total;
+    }
+
     private DialogueLine[] ChooseEnding()
     {
-        int score = 0;
-        bool anyF = false;
-
-        for (int i = 0; i < grades.Length; i++)
+        switch (StoryRules.FinalEnding(TotalScore(), professorAffinity))
         {
-            if (!hasGrade[i]) continue;
-            if (grades[i] == Grade.F) anyF = true;
-            score += grades[i] == Grade.A ? 2 : grades[i] == Grade.B ? 1 : 0;
+            case 2: return story.endingRepeat;
+            case 3: return story.endingExcellent;
+            default: return story.endingGraduate;
         }
-
-        Debug.Log($"최종 점수: {score}, F 있음: {anyF}");
-
-        if (anyF) return story.endingRepeat;                    // ENDING 02
-        if (score >= excellentScore) return story.endingExcellent; // ENDING 03
-        return story.endingGraduate;                            // ENDING 01
     }
 
     private void EndGame(string reason)
@@ -509,13 +650,15 @@ public class DialogueManager : MonoBehaviour
 
         Debug.Log($"게임 종료: {reason}");
         onGameEnd?.Invoke();
+        if (gameObject.scene.name == "Story_S")
+            SceneManager.LoadScene("Start_S1");
     }
 
     // ───────── 다른 스크립트에서 쓸 수 있는 정보 ─────────
 
     // 해당 에피소드에서 고른 선택지 (0=A, 1=B, 2=C, 안 골랐으면 -1)
     public int GetChoice(int episode) =>
-        choicesMade != null && episode < choicesMade.Length ? choicesMade[episode] : -1;
+        choicesMade != null && episode >= 0 && episode < choicesMade.Length ? choicesMade[episode] : -1;
 
     // 지금 진행 중인 에피소드 번호 (0 = EP.1)
     public int CurrentEpisodeIndex => episodeIndex;

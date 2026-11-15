@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MemoryGameManager : MonoBehaviour
 {
-    [Header("Ä«µå ¿¬°á")]
+    [Header("ì¹´ë“œ ì—°ê²°")]
     public Transform cardBoard;
     public MemoryCard cardPrefab;
 
@@ -13,25 +13,22 @@ public class MemoryGameManager : MonoBehaviour
     public TMP_Text pairText;
     public TMP_Text attemptText;
 
-    [Header("°á°úÃ¢")]
+    [Header("ê²°ê³¼ì°½")]
     public GameObject resultPanel;
     public TMP_Text resultText;
 
-    [Header("°ÔÀÓ ¼³Á¤")]
+    [Header("ê²Œì„ ì„¤ì •")]
     public float flipBackDelay = 0.8f;
 
-    [Header("µî±Ş ¼³Á¤")]
-    [Min(8)]
-    public int aGradeMaxAttempts = 12;
+    [Header("ì‹œí—˜ ì„¤ì •")]
+    [Min(1f)] public float timeLimit = 60f;
+    [Min(0f)] public float previewTime = 7f;
 
-    [Min(8)]
-    public int maxAttempts = 20;
-
-    [Header("¼­·Î ´Ù¸¥ ´Ü¾î 8°³")]
+    [Header("ì„œë¡œ ë‹¤ë¥¸ ë‹¨ì–´ 8ê°œ")]
     public string[] words =
     {
-        "»ç°ú", "¹Ù´Ù", "ÇĞ±³", "°ÔÀÓ",
-        "°í¾çÀÌ", "³ëÆ®ºÏ", "ÇÏ´Ã", "Ä£±¸"
+        "ì‚¬ê³¼", "ë°”ë‹¤", "í•™êµ", "ê²Œì„",
+        "ê³ ì–‘ì´", "ë…¸íŠ¸ë¶", "í•˜ëŠ˜", "ì¹œêµ¬"
     };
 
     public MiniGameSceneFlow sceneFlow;
@@ -41,19 +38,18 @@ public class MemoryGameManager : MonoBehaviour
 
     private int matchedPairs;
     private int attempts;
+    private int hearts = StoryRules.FullHearts;
+    private float remainingTime;
+    private float previewRemaining;
+    private readonly List<MemoryCard> cards = new List<MemoryCard>();
 
     private bool isChecking;
     private bool isFinished;
 
     private void Start()
     {
-        maxAttempts = Mathf.Max(8, maxAttempts);
-
-        aGradeMaxAttempts = Mathf.Clamp(
-            aGradeMaxAttempts,
-            8,
-            maxAttempts
-        );
+        remainingTime = timeLimit;
+        previewRemaining = previewTime;
 
         if (resultPanel != null)
         {
@@ -67,8 +63,7 @@ public class MemoryGameManager : MonoBehaviour
 
         if (!ValidateWords())
         {
-            isFinished = true;
-            ShowResult("¼­·Î ´Ù¸¥ ´Ü¾î 8°³¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä.");
+            FinishGame(false);
             return;
         }
 
@@ -76,11 +71,36 @@ public class MemoryGameManager : MonoBehaviour
         UpdateUI();
     }
 
+    private void Update()
+    {
+        if (SettingsMenu.BlocksGameplay)
+            return;
+
+        if (isFinished)
+            return;
+
+        if (previewRemaining > 0f)
+        {
+            previewRemaining = Mathf.Max(0f, previewRemaining - Time.deltaTime);
+            if (previewRemaining <= 0f)
+                foreach (MemoryCard card in cards)
+                    card.Hide();
+        }
+        else
+        {
+            remainingTime = Mathf.Max(0f, remainingTime - Time.deltaTime);
+            if (remainingTime <= 0f)
+                FinishGame(false);
+        }
+
+        UpdateUI();
+    }
+
     private bool ValidateWords()
     {
         if (words == null || words.Length != 8)
         {
-            Debug.LogError("Words¿¡´Â ´Ü¾î 8°³°¡ ÇÊ¿äÇÕ´Ï´Ù.");
+            Debug.LogError("Wordsì—ëŠ” ë‹¨ì–´ 8ê°œê°€ í•„ìš”í•©ë‹ˆë‹¤.");
             return false;
         }
 
@@ -92,7 +112,7 @@ public class MemoryGameManager : MonoBehaviour
                 !uniqueWords.Add(word.Trim()))
             {
                 Debug.LogError(
-                    "ºó ´Ü¾î ¾øÀÌ ¼­·Î ´Ù¸¥ ´Ü¾î 8°³¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä."
+                    "ë¹ˆ ë‹¨ì–´ ì—†ì´ ì„œë¡œ ë‹¤ë¥¸ ë‹¨ì–´ 8ê°œë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”."
                 );
 
                 return false;
@@ -125,12 +145,15 @@ public class MemoryGameManager : MonoBehaviour
         {
             MemoryCard card = Instantiate(cardPrefab, cardBoard);
             card.Initialize(word, this);
+            cards.Add(card);
+            if (previewRemaining > 0f)
+                card.Reveal();
         }
     }
 
     public void SelectCard(MemoryCard card)
     {
-        if (isFinished || isChecking ||
+        if (SettingsMenu.BlocksGameplay || isFinished || isChecking || previewRemaining > 0f ||
             card.IsRevealed || card.IsMatched)
         {
             return;
@@ -164,7 +187,12 @@ public class MemoryGameManager : MonoBehaviour
         }
         else
         {
+            hearts--;
+            UpdateUI();
             yield return new WaitForSeconds(flipBackDelay);
+
+            if (isFinished)
+                yield break;
 
             firstCard.Hide();
             secondCard.Hide();
@@ -175,12 +203,11 @@ public class MemoryGameManager : MonoBehaviour
 
         UpdateUI();
 
-        // ¸¶Áö¸· Çã¿ë ½Ãµµ¿¡ ¸ğµÎ ¸ÂÃß¸é ¼º°ø
         if (matchedPairs == 8)
         {
             FinishGame(true);
         }
-        else if (attempts >= maxAttempts)
+        else if (hearts <= 0)
         {
             FinishGame(false);
         }
@@ -192,13 +219,14 @@ public class MemoryGameManager : MonoBehaviour
     {
         if (pairText != null)
         {
-            pairText.text = "Â¦ : " + matchedPairs + " / 8";
+            pairText.text = "ì§ : " + matchedPairs + " / 8";
         }
 
         if (attemptText != null)
         {
-            attemptText.text =
-                "½Ãµµ : " + attempts + " / " + maxAttempts;
+            attemptText.text = previewRemaining > 0f
+                ? "ì•”ê¸° : " + Mathf.CeilToInt(previewRemaining)
+                : "í•˜íŠ¸ " + hearts + " / ì‹œê°„ " + Mathf.CeilToInt(remainingTime);
         }
     }
 
@@ -209,33 +237,23 @@ public class MemoryGameManager : MonoBehaviour
 
         isFinished = true;
 
-        string grade;
-
         if (!success)
-        {
-            grade = "F";
-        }
-        else if (attempts <= aGradeMaxAttempts)
-        {
-            grade = "A";
-        }
-        else
-        {
-            grade = "B";
-        }
+            hearts = 0;
 
-        string title = success ? "Å¬¸®¾î!" : "½ÇÆĞ";
+        Grade grade = StoryRules.GradeForHearts(hearts);
+
+        string title = success ? "í´ë¦¬ì–´!" : "ì‹¤íŒ¨";
 
         ShowResult(
             title + "\n\n" +
-            "µî±Ş : " + grade + "\n" +
-            "¸ÂÃá Â¦ : " + matchedPairs + " / 8\n" +
-            "ÃÑ ½Ãµµ : " + attempts + "È¸"
+            "ë“±ê¸‰ : " + grade + "\n" +
+            "ë§ì¶˜ ì§ : " + matchedPairs + " / 8\n" +
+            "ì´ ì‹œë„ : " + attempts + "íšŒ"
         );
 
         if (sceneFlow != null)
         {
-            sceneFlow.OnGameFinished();
+            sceneFlow.OnGameFinished(hearts);
         }
     }
 

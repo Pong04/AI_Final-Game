@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,21 +8,26 @@ public class MiniGameSceneFlow : MonoBehaviour
     public string nextSceneName;
     public float delay = 3f;
 
+    public Action<int> ReturnToStory { get; set; }
+
     private bool isMoving;
 
-    public void OnGameFinished()
+    public void OnGameFinished(int hearts)
     {
-        if (isMoving || string.IsNullOrWhiteSpace(nextSceneName))
+        if (isMoving || (ReturnToStory == null && string.IsNullOrWhiteSpace(nextSceneName)))
             return;
 
         isMoving = true;
-        StartCoroutine(MoveNextScene());
+        StartCoroutine(MoveNextScene(hearts));
     }
 
-    private IEnumerator MoveNextScene()
+    private IEnumerator MoveNextScene(int hearts)
     {
-        yield return new WaitForSecondsRealtime(delay);
+        yield return new WaitForSeconds(delay);
 
-        SceneManager.LoadScene(nextSceneName);
+        if (ReturnToStory != null)
+            ReturnToStory(hearts);
+        else
+            SceneManager.LoadScene(nextSceneName);
     }
 }

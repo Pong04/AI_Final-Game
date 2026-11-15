@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SceneManagement;
 
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -15,11 +14,11 @@ public class MashGameManager : MonoBehaviour
     public TMP_Text countText;
     public TMP_Text timerText;
 
-    [Header("°á°úÃ¢")]
+    [Header("ê²°ê³¼ì°½")]
     public GameObject resultPanel;
     public TMP_Text resultText;
 
-    [Header("°ÔÀÓ ¼³Á¤")]
+    [Header("ê²Œì„ ì„¤ì •")]
     [Range(0f, 100f)]
     public float startGauge = 30f;
 
@@ -29,18 +28,16 @@ public class MashGameManager : MonoBehaviour
     [Min(0.1f)]
     public float timeLimit = 15f;
 
-    [Header("µî±Ş ¼³Á¤")]
-    [Range(0f, 100f)]
-    public float aGradePercent = 80f;
-
-    [Range(0f, 100f)]
-    public float bGradePercent = 50f;
+    [Header("í•˜íŠ¸ íŒì •")]
+    [Range(0f, 100f)] public float checkpointPercent = 50f;
 
     public MiniGameSceneFlow sceneFlow;
 
     private float currentGauge;
     private float remainingTime;
     private int pressCount;
+    private int hearts;
+    private int nextCheckpoint;
     private bool isFinished;
 
     private void Start()
@@ -48,6 +45,8 @@ public class MashGameManager : MonoBehaviour
         currentGauge = Mathf.Clamp(startGauge, 0f, 100f);
         remainingTime = timeLimit;
         pressCount = 0;
+        hearts = StoryRules.FullHearts;
+        nextCheckpoint = 1;
         isFinished = false;
 
         powerGauge.minValue = 0f;
@@ -70,18 +69,17 @@ public class MashGameManager : MonoBehaviour
 
     private void Update()
     {
+        if (SettingsMenu.BlocksGameplay)
+            return;
+
         bool spacePressed;
-        bool restartPressed;
 
 #if ENABLE_INPUT_SYSTEM
         spacePressed = Keyboard.current != null &&
                        Keyboard.current.spaceKey.wasPressedThisFrame;
 
-        restartPressed = Keyboard.current != null &&
-                         Keyboard.current.rKey.wasPressedThisFrame;
 #else
         spacePressed = Input.GetKeyDown(KeyCode.Space);
-        restartPressed = Input.GetKeyDown(KeyCode.R);
 #endif
 
         if (isFinished)
@@ -92,19 +90,13 @@ public class MashGameManager : MonoBehaviour
             remainingTime - Time.deltaTime
         );
 
-        if (remainingTime <= 0f)
-        {
-            FinishGame();
-            return;
-        }
-
-        // ½Ã°£ÀÌ Èå¸£¸é °ÔÀÌÁö °¨¼Ò
+        // ì‹œê°„ì´ íë¥´ë©´ ê²Œì´ì§€ ê°ì†Œ
         currentGauge = Mathf.Max(
             0f,
             currentGauge - decreasePerSecond * Time.deltaTime
         );
 
-        // ½ºÆäÀÌ½º¹Ù¸¦ »õ·Î ´©¸¦ ¶§¸¶´Ù Áõ°¡
+        // ìŠ¤í˜ì´ìŠ¤ë°”ë¥¼ ìƒˆë¡œ ëˆ„ë¥¼ ë•Œë§ˆë‹¤ ì¦ê°€
         if (spacePressed)
         {
             pressCount++;
@@ -114,6 +106,22 @@ public class MashGameManager : MonoBehaviour
                 0f,
                 100f
             );
+        }
+
+        // ì œí•œì‹œê°„ì„ ì„¸ êµ¬ê°„ìœ¼ë¡œ ë‚˜ëˆ  ëª©í‘œ ê²Œì´ì§€ ë¯¸ë‹¬ ì‹œ í•˜íŠ¸ë¥¼ ìƒëŠ”ë‹¤.
+        while (nextCheckpoint <= StoryRules.FullHearts &&
+               remainingTime <= timeLimit * (StoryRules.FullHearts - nextCheckpoint) / StoryRules.FullHearts)
+        {
+            if (currentGauge < checkpointPercent)
+                hearts--;
+
+            nextCheckpoint++;
+        }
+
+        if (remainingTime <= 0f)
+        {
+            FinishGame();
+            return;
         }
 
         UpdateUI();
@@ -126,12 +134,12 @@ public class MashGameManager : MonoBehaviour
         if (percentText != null)
         {
             percentText.text =
-                Mathf.FloorToInt(currentGauge) + "%";
+                Mathf.FloorToInt(currentGauge) + "% / ëª©í‘œ " + checkpointPercent + "%";
         }
 
         if (countText != null)
         {
-            countText.text = "¿¬Å¸ x" + pressCount;
+            countText.text = "ì—°íƒ€ Ã—" + pressCount + " / í•˜íŠ¸ " + hearts;
         }
 
         if (timerText != null)
@@ -149,20 +157,7 @@ public class MashGameManager : MonoBehaviour
         isFinished = true;
         UpdateUI();
 
-        string grade;
-
-        if (currentGauge >= aGradePercent)
-        {
-            grade = "A";
-        }
-        else if (currentGauge >= bGradePercent)
-        {
-            grade = "B";
-        }
-        else
-        {
-            grade = "F";
-        }
+        Grade grade = StoryRules.GradeForHearts(hearts);
 
         if (resultPanel != null)
         {
@@ -171,19 +166,19 @@ public class MashGameManager : MonoBehaviour
 
         if (resultText != null)
         {
-            string title = grade == "F" ? "½ÇÆĞ" : "Å¬¸®¾î!";
+            string title = grade == Grade.F ? "ì‹¤íŒ¨" : "í´ë¦¬ì–´!";
 
             resultText.text =
                 title + "\n\n" +
-                "µî±Ş : " + grade + "\n" +
-                "ÃÖÁ¾ °ÔÀÌÁö : " +
+                "ë“±ê¸‰ : " + grade + "\n" +
+                "ìµœì¢… ê²Œì´ì§€ : " +
                 Mathf.FloorToInt(currentGauge) + "%\n" +
-                "¿¬Å¸ È½¼ö : " + pressCount + "È¸\n\n";
+                "ì—°íƒ€ íšŸìˆ˜ : " + pressCount + "íšŒ\n\n";
         }
 
         if (sceneFlow != null)
         {
-            sceneFlow.OnGameFinished();
+            sceneFlow.OnGameFinished(hearts);
         }
     }
 }
